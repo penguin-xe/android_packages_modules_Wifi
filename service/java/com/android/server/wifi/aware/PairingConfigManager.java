@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -185,17 +186,19 @@ public class PairingConfigManager {
     public void removePairedDevice(String packageName, String alias) {
         mAliasToNikMap.remove(alias);
         mAliasToSecurityInfoMap.remove(alias);
-        Set<String> aliasSet = mPerAppPairedAliasMap.remove(packageName);
-        if (aliasSet == null) {
-            return;
+        if (mPerAppPairedAliasMap.containsKey(packageName)) {
+            mPerAppPairedAliasMap.get(packageName).remove(alias);
         }
-        aliasSet.remove(alias);
     }
 
     /**
      * Get all paired devices alias for target calling app
      */
     public List<String> getAllPairedDevices(String callingPackage) {
-        return new ArrayList<>(mPerAppPairedAliasMap.get(callingPackage));
+        Set<String> aliasSet = mPerAppPairedAliasMap.get(callingPackage);
+        if (aliasSet == null) {
+            return Collections.emptyList();
+        }
+        return new ArrayList<>(aliasSet);
     }
 }
