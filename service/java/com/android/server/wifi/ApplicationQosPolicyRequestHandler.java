@@ -66,7 +66,6 @@ public class ApplicationQosPolicyRequestHandler {
     private final ApCallback mApCallback;
     private final ApplicationQosPolicyTrackingTable mPolicyTrackingTable;
     private final ApplicationDeathRecipient mApplicationDeathRecipient;
-    private final DeviceConfigFacade mDeviceConfigFacade;
     private final Context mContext;
     private boolean mVerboseLoggingEnabled;
 
@@ -246,7 +245,7 @@ public class ApplicationQosPolicyRequestHandler {
 
     public ApplicationQosPolicyRequestHandler(@NonNull ActiveModeWarden activeModeWarden,
             @NonNull WifiNative wifiNative, @NonNull HandlerThread handlerThread,
-            @NonNull DeviceConfigFacade deviceConfigFacade, @NonNull Context context) {
+            @NonNull Context context) {
         mActiveModeWarden = activeModeWarden;
         mWifiNative = wifiNative;
         mHandler = new Handler(handlerThread.getLooper());
@@ -256,7 +255,6 @@ public class ApplicationQosPolicyRequestHandler {
         mApplicationUidToBinderMap = new HashMap<>();
         mApCallback = new ApCallback();
         mApplicationDeathRecipient = new ApplicationDeathRecipient();
-        mDeviceConfigFacade = deviceConfigFacade;
         mContext = context;
         mVerboseLoggingEnabled = false;
         mPolicyTrackingTable =
@@ -284,18 +282,22 @@ public class ApplicationQosPolicyRequestHandler {
         }
     }
 
+    private boolean isEnabledInOverlay() {
+        return mContext.getResources().getBoolean(
+                R.bool.config_wifiApplicationCentricQosPolicyFeatureEnabled);
+    }
+
+    private boolean isSupportedInHal() {
+        return mWifiNative.isSupplicantAidlServiceVersionAtLeast(2);
+    }
+
     /**
      * Check whether the Application QoS policy feature is enabled.
      *
      * @return true if the feature is enabled, false otherwise.
      */
     public boolean isFeatureEnabled() {
-        // Both the experiment flag and overlay value must be enabled,
-        // and the HAL must support this feature.
-        return mDeviceConfigFacade.isApplicationQosPolicyApiEnabled()
-                && mContext.getResources().getBoolean(
-                R.bool.config_wifiApplicationCentricQosPolicyFeatureEnabled)
-                && mWifiNative.isSupplicantAidlServiceVersionAtLeast(2);
+        return isEnabledInOverlay() && isSupportedInHal();
     }
 
     /**
@@ -734,6 +736,8 @@ public class ApplicationQosPolicyRequestHandler {
      */
     public void dump(PrintWriter pw) {
         pw.println("Dump of ApplicationQosPolicyRequestHandler");
+        pw.println("Overlay enabled: " + isEnabledInOverlay());
+        pw.println("HAL support: " + isSupportedInHal());
         pw.println("mPerIfaceRequestQueue: " + mPerIfaceRequestQueue);
         pw.println("mPendingCallbacks: " + mPendingCallbacks);
         pw.println();
