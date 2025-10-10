@@ -66,7 +66,6 @@ public class ApplicationQosPolicyRequestHandlerTest {
     @Mock ActiveModeWarden mActiveModeWarden;
     @Mock WifiNative mWifiNative;
     @Mock HandlerThread mHandlerThread;
-    @Mock DeviceConfigFacade mDeviceConfigFacade;
     @Mock Context mContext;
     @Mock IListListener mIListListener;
     @Mock ClientModeManager mClientModeManager0;
@@ -84,7 +83,7 @@ public class ApplicationQosPolicyRequestHandlerTest {
 
     private class ApplicationQosPolicyRequestHandlerSpy extends ApplicationQosPolicyRequestHandler {
         ApplicationQosPolicyRequestHandlerSpy() {
-            super(mActiveModeWarden, mWifiNative, mHandlerThread, mDeviceConfigFacade, mContext);
+            super(mActiveModeWarden, mWifiNative, mHandlerThread, mContext);
         }
 
         @Override
